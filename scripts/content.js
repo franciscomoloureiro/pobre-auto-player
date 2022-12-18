@@ -5,7 +5,6 @@ if(isVideoFrame){
 
   if(video){
     video.addEventListener('timeupdate', (event) => {
-      console.log("timeupdate");
       if(video.duration > 100 && (video.duration - video.currentTime) <= 30){
         (async () => {      
           var port = chrome.runtime.connect({name: "player"});
@@ -19,14 +18,25 @@ if(isVideoFrame){
   }
 }else{
   const prePlayButton = document.querySelector(".prePlayButton");
+  const params = new URLSearchParams(window.location.search);
 
-  if(prePlayButton){
+  console.log(window.location.search);
+  if(params.get('autoplay')){
     prePlayButton.click();
   }
 
   var port = chrome.runtime.connect({name: "episode"});
     
   port.onMessage.addListener(function(msg) {
-    document.querySelector(".nextEp").click()
+    const pathParameters = location.pathname.split("/");
+    const episodeNumber = parseInt(pathParameters[pathParameters.lastIndexOf("episode") + 1]);
+    const episodeDiv = document.querySelector('[data-episode-number="' + (episodeNumber+1) + '"]');
+    const url = new URL(episodeDiv.parentElement.href);
+    const searchParams = new URLSearchParams(url.search);
+    
+    searchParams.set("autoplay", "true");
+    url.search =searchParams.toString();
+    
+    window.location.href = url.toString() 
   });
 }
