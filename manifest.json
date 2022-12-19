@@ -8,7 +8,7 @@
      },
     "content_scripts": [
         {
-          "js": ["scripts/content.js"],
+          "js": ["scripts/episode-list.js", "scripts/frame.js"],
           "matches": [
             "https://*.pobre.wtf/*"
           ],
