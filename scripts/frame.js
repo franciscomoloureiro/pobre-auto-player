@@ -5,6 +5,32 @@ setTimeout(()=>{
     let html = await (await fetch(toolbar_url)).text();
 
     videoDiv.appendChild(new DOMParser().parseFromString(html, 'text/html').body.childNodes[0]);
+
+    videoDiv.querySelector("#nextEpisodeCancel").addEventListener('click', (e) => {});
+    videoDiv.querySelector("#goToNextEpisode").addEventListener('click', goToNextEpisode);
+
+    var seconds = 5;
+    videoDiv.querySelector("#nextEpisodeSeconds").html = seconds;
+
+    countdown(videoDiv, seconds);
+  }
+
+  function countdown(videoDiv, seconds){
+    if(seconds < 0){
+      goToNextEpisode();
+    }else{
+      setTimeout(() => {
+        seconds--;
+        videoDiv.querySelector("#nextEpisodeSeconds").innerHTML = seconds;
+        countdown(videoDiv, seconds);
+      }, 1000);
+    }
+  }
+
+  async function goToNextEpisode(){
+    var port = chrome.runtime.connect({name: "player"});
+    // port.postMessage({nextEpisode: true});
+    alert("next episode");
   }
 
   console.log(window.frameElement);
@@ -19,12 +45,8 @@ setTimeout(()=>{
 
     if(video){
       video.addEventListener('timeupdate', (event) => {
-        console.log("timeupdate");
         if(video.duration > 100 && (video.duration - video.currentTime) <= 30){
-          (async () => {      
-            var port = chrome.runtime.connect({name: "player"});
-            // port.postMessage({nextEpisode: true});
-          })();
+          
         }
       });
     }else{
