@@ -5,7 +5,13 @@
     "version": "0.0",
     "background": {
         "service_worker":"event-handler.js"
-     },
+    },
+    "web_accessible_resources": [{
+      "matches": [
+        "https://*.pobre.wtf/*"
+      ],
+      "resources": ["next-episode.html"]
+    }],
     "content_scripts": [
         {
           "js": ["scripts/episode-list.js", "scripts/frame.js"],

@@ -6,16 +6,21 @@ if(!isVideoFrame){
     const params = new URLSearchParams(window.location.search);
 
     console.log(window.location.search);
+    
     if(params.get('autoplay')){
-    prePlayButton.click();
+        prePlayButton.click();
     }
 
     var port = chrome.runtime.connect({name: "episode"});
     
     port.onMessage.addListener(() => {
         // move to next episode or season
-        window.location.href = getNextEpisodeAddress( getCurrentEpisode()); 
+        window.location.href = getNextEpisodeAddress(getCurrentEpisode()); 
     });
+
+    const showNextEpisodeTooltip = () => {
+
+    }
 
     const getCurrentEpisode = () => {
         const episodeNumber = document.querySelector('.poster.active').parentElement.getAttribute('data-episode-number');
