@@ -1,0 +1,28 @@
+#nextEpisodeSeconds{
+    margin: auto;
+    border: 3px solid #222222;
+    border-top: 3px solid #868686;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    text-align: center;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: spin 1s linear infinite;
+}
+
+#nextEpisodeSecondsSpan{
+    animation: reversespin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes reversespin {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+}

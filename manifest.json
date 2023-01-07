@@ -15,6 +15,7 @@
     "content_scripts": [
         {
           "js": ["scripts/episode-list.js", "scripts/frame.js"],
+          "css": [ "next-episode.css" ],
           "matches": [
             "https://*.pobre.wtf/*"
           ],
