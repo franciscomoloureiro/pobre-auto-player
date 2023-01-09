@@ -3,7 +3,11 @@
 }
 
 .stopped{
-    border-top: 3px solid #222222;
+    border-top: 3px solid #222222 !important;
+}
+
+.hidden{
+    display: none !important;
 }
 
 #nextEpisodeSeconds{

@@ -14,8 +14,9 @@ if(isVideoFrame1){
   
       let seconds = 5;
       const secondsSpan = videoDiv.querySelector("#nextEpisodeSecondsSpan");
+      const animatedElement = videoDiv.querySelector("#nextEpisodeSeconds")
       secondsSpan.html = seconds;
-      countdown(secondsSpan, seconds);
+      countdown(animatedElement, secondsSpan, seconds);
     }
   
     function unloadNextEpisodeElement(videoDiv) {
@@ -26,37 +27,49 @@ if(isVideoFrame1){
         timeoutId = null;
       }
     }
+
     function cancelCountdown(){
       const videoDiv = document.querySelector("#customVideoPlayer div");
       const secondsSpan = videoDiv.querySelector("#nextEpisodeSecondsSpan");
-      
-      secondsSpan.innerHTML = ""
+      const secondsElement = videoDiv.querySelector("#nextEpisodeSeconds");
+
+      videoDiv.querySelector("#nextEpisodeCancel").classList.add("hidden");
+      secondsElement.classList.add("hidden");
+
+      secondsSpan.innerHTML = "";
 
       clearTimeout(timeoutId);
       timeoutId = null;
     }
-    function countdown(secondsSpan, seconds){
+    
+    function countdown(animatedElement, secondsSpan, seconds){
+      secondsSpan.innerHTML = seconds;
+
       timeoutId = setTimeout(() => {
         secondsSpan.innerHTML = --seconds;
         if(seconds <= 0 && timeoutId){
           goToNextEpisode();
+
+          animatedElement.classList.remove("animated")
+          animatedElement.classList.add("stopped")
+
         }else{
-          countdown(secondsSpan, seconds);
+          countdown(animatedElement, secondsSpan, seconds);
         }
       }, 1000);
     }
   
     async function goToNextEpisode(){
       var port = chrome.runtime.connect({name: "player"});
-      // port.postMessage({nextEpisode: true});
+      port.postMessage({nextEpisode: true});
     }
   
     console.log(window.frameElement);
     if(isVideoFrame1){
       const video = document.querySelector("video");
       const videoDiv = document.querySelector("#customVideoPlayer div");
-      loadNextEpisodeElement(videoDiv);
   
+      loadNextEpisodeElement(videoDiv);
       console.log(video);
       console.log(videoDiv);
   
@@ -69,8 +82,8 @@ if(isVideoFrame1){
             console.log("load ele");
           }else if(video.duration > 100 && (video.duration - video.currentTime) > 30 ){
             console.log("unload");
-            // isElementLoaded = false;
-            // unloadNextEpisodeElement(videoDiv);
+            isElementLoaded = false;
+            unloadNextEpisodeElement(videoDiv);
           }
         });
       }else{
