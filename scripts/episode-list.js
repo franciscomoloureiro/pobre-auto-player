@@ -1,18 +1,34 @@
 const isVideoFrame = window.frameElement != null;
+console.log(window.ads)
 
 if(!isVideoFrame){
-    const prePlayButton = document.querySelector(".prePlayButton");
-    const params = new URLSearchParams(window.location.search);
+    const generalModal = document.querySelector(".generalModal")
 
-    if(params.get('autoplay')){
-        prePlayButton.click();
+    if(generalModal){
+        generalModal.remove();
     }
-
+    
+    const prePlayButton = document.querySelector(".play-button");
+    const params = new URLSearchParams(window.location.search);
     var port = chrome.runtime.connect({name: "episode"});
     
-    port.onMessage.addListener(() => {
+    if(params.get('isFullScreen') === 'true'){
+        setTimeout(()=>{
+        console.log("massage")
+        console.log(port)
+ console.log(window.ads)
+            
+            port.postMessage({fullScreen: true})}, 12000);
+        
+    }
+
+    if(params.get('autoplay') === 'true'){
+        prePlayButton.click();
+    }
+    
+    port.onMessage.addListener((event) => {
         // move to next episode or season
-        window.location.href = getNextEpisodeAddress(getCurrentEpisode()); 
+        window.location.href = getNextEpisodeAddress(getCurrentEpisode(), event.videoWidth); 
     });
 
     const getCurrentEpisode = () => {
@@ -20,14 +36,15 @@ if(!isVideoFrame){
         return parseInt(episodeNumber);
     };
 
-    const getNextEpisodeAddress = (currentEpisode) => {
-        const nextEpisodeDiv = document.querySelector('[data-episode-number="' + currentEpisode + '"]');
-        const isEndOfSeason = document.querySelector('.slider-item > .poster.active').parentElement.getAttribute('data-episode-number') == currentEpisode;
+    const getNextEpisodeAddress = (currentEpisode, videoWidth) => {
+        const nextEpisodeDiv = document.querySelector('[data-episode-number="' + (currentEpisode + 1) + '"]');
+        const isEndOfSeason = document.querySelector(".content-episodes").lastChild.previousElementSibling.childNodes[1].getAttribute('data-episode-number') == currentEpisode;
 
-        const url = !isEndOfSeason ? new URL(nextEpisodeDiv.parentElement.href) : new URL(document.querySelector('.open_season').nextElementSibling.href);
+        const url = !isEndOfSeason ? new URL(nextEpisodeDiv.parentElement.href) : new URL(document.querySelector('.open-season').nextElementSibling.href);
         const searchParams = new URLSearchParams(url.search);
 
         searchParams.set("autoplay", "true");
+        searchParams.set("isFullScreen", videoWidth >= document.body.clientWidth);
         url.search = searchParams.toString();
         
         return url.toString();

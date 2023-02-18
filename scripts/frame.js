@@ -1,7 +1,14 @@
 const isVideoFrame1 = window.frameElement != null;
+const modal = document.querySelector(".generalModal");
+console.log(modal)
+if(modal){
+  modal.remove();
+}
 if(isVideoFrame1){
+ console.log(window.ads)
   setTimeout(()=>{
     let timeoutId;
+ console.log(window.ads)
   
     async function loadNextEpisodeElement(videoDiv) {
       let toolbar_url = chrome.runtime.getURL("next-episode.html");
@@ -58,44 +65,44 @@ if(isVideoFrame1){
         }
       }, 1000);
     }
-  
+   
     async function goToNextEpisode(){
-      var port = chrome.runtime.connect({name: "player"});
-      port.postMessage({nextEpisode: true});
+      
+
+      port.postMessage({nextEpisode: true, videoWidth: document.querySelector("video").clientWidth});
     }
+    var port = chrome.runtime.connect({name: "player"});
   
-    console.log(window.frameElement);
     if(isVideoFrame1){
       const video = document.querySelector("video");
       const videoDiv = document.querySelector("#customVideoPlayer div");
-  
-      loadNextEpisodeElement(videoDiv);
-      console.log(video);
-      console.log(videoDiv);
-  
+      
       if(video){
+        port.onMessage.addListener((event) => {
+        if(event.fullScreen){
+          document.body.addEventListener("click",() => video.requestFullscreen())
+          document.body.click()
+        }
+        });
+
         let isElementLoaded = false;
         video.addEventListener('timeupdate', (event) => {
-          if(video.duration > 100 && (video.duration - video.currentTime) <= 30 && !isElementLoaded){
-            isElementLoaded = true;
-            loadNextEpisodeElement(videoDiv);
-            console.log("load ele");
-          }else if(video.duration > 100 && (video.duration - video.currentTime) > 30 ){
-            console.log("unload");
-            isElementLoaded = false;
-            unloadNextEpisodeElement(videoDiv);
+          if (video.duration > 100){
+            if((video.duration - video.currentTime) <= 30 && !isElementLoaded){
+              isElementLoaded = true;
+              loadNextEpisodeElement(videoDiv);
+              
+            }else if((video.duration - video.currentTime) > 30 ){
+              isElementLoaded = false;
+              unloadNextEpisodeElement(videoDiv);
+            }
           }
-        });
+        });  
       }else{
         console.log("video element not found");
         console.log(document);
       }
-  
     }
-  
     addEventListener('DOMContentLoaded', (event) => { console.log(event, "domload")});
-  
-  
   }, 5000);
-  
 }
