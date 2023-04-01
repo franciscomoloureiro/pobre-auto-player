@@ -1,52 +1,75 @@
 const isVideoFrame = window.frameElement != null;
-console.log(window.ads)
 
 if(!isVideoFrame){
-    const generalModal = document.querySelector(".generalModal")
+    function injectScript(file_path, tag) {
+        var script = document.createElement('script');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('src', file_path);
+        document.documentElement.appendChild(script);
+    }
+    injectScript(chrome.runtime.getURL('scripts/script.js'), 'body');
 
+    const generalModal = document.querySelector(".generalModal")
+    
     if(generalModal){
         generalModal.remove();
     }
-    
-    const prePlayButton = document.querySelector(".play-button");
-    const params = new URLSearchParams(window.location.search);
-    var port = chrome.runtime.connect({name: "episode"});
-    
-    if(params.get('isFullScreen') === 'true'){
-        setTimeout(()=>{
-        console.log("massage")
-        console.log(port)
- console.log(window.ads)
-            
-            port.postMessage({fullScreen: true})}, 12000);
-        
-    }
 
-    if(params.get('autoplay') === 'true'){
-        prePlayButton.click();
-    }
+    var port = chrome.runtime.connect({name: "episode"});
     
     port.onMessage.addListener((event) => {
         // move to next episode or season
-        window.location.href = getNextEpisodeAddress(getCurrentEpisode(), event.videoWidth); 
-    });
+        var src = getNextEpisodeAddress();
+ 
+        fetch("https://www4.pobre.wtf/player/0000/1/"+src+"/1")
+        .then(r => r.json())
+        .then(d => { 
+            fetch(d.players[0].iframe)
+            .then(r => r.text())
+            .then(async(body) => {
+                const lines =  body.split(/\r?\n/);
+                
+                let encrypedStreamingLink, iv ='';
+
+                lines.forEach((l) =>{
+                    if(l.includes('fui093jnf0n34u9fnh3rqwe9i0f30i4fm3')){
+                        encrypedStreamingLink = l.match(/'([^']*)'/)[1];
+                    }
+                    if(l.includes('vn9u304jmi0vfernjgu9r3nmefomcreojm')){
+                        iv = l.match(/'([^']*)'/)[1];
+                    }
+
+                    if(encrypedStreamingLink && iv){
+                        return;
+                    }
+                })
+
+                var STREAMING_LINK_SETTINGS = {
+                                    key: "b75524255a7f54d272j47d1bb39204df",
+                                    iv: iv.replace("AajuOvh1tN5lAexLtfJrp", ""),
+                                    encrypedStreamingLink: encrypedStreamingLink.replace("KqBBeU93YLao9pOCAqKLb", "")
+                                };
+                        
+                function getStreamingLink() {
+                                    var key = CryptoJS.enc.Utf8.parse(STREAMING_LINK_SETTINGS.key);
+                                    var iv = CryptoJS.enc.Utf8.parse(STREAMING_LINK_SETTINGS.iv);
+                                    var decrypted = CryptoJS.AES.decrypt(STREAMING_LINK_SETTINGS.encrypedStreamingLink, key, {
+                                        iv: iv
+                                    });
+                                    return decrypted.toString(CryptoJS.enc.Utf8);
+                                }
+                                port.postMessage({link: getStreamingLink()})}, 12000);
+                    }
+            )
+        });
 
     const getCurrentEpisode = () => {
         const episodeNumber = document.querySelector('.poster.active').parentElement.getAttribute('data-episode-number');
         return parseInt(episodeNumber);
     };
-
-    const getNextEpisodeAddress = (currentEpisode, videoWidth) => {
-        const nextEpisodeDiv = document.querySelector('[data-episode-number="' + (currentEpisode + 1) + '"]');
-        const isEndOfSeason = document.querySelector(".content-episodes").lastChild.previousElementSibling.childNodes[1].getAttribute('data-episode-number') == currentEpisode;
-
-        const url = !isEndOfSeason ? new URL(nextEpisodeDiv.parentElement.href) : new URL(document.querySelector('.open-season').nextElementSibling.href);
-        const searchParams = new URLSearchParams(url.search);
-
-        searchParams.set("autoplay", "true");
-        searchParams.set("isFullScreen", videoWidth >= document.body.clientWidth);
-        url.search = searchParams.toString();
-        
-        return url.toString();
+    const getNextEpisodeAddress = () => {
+        const nextEpisodeDiv = document.querySelector('[data-episode-number="' + (++currentEpisode) + '"]');
+        return nextEpisodeDiv.dataset.episodeId;
     } 
+    let currentEpisode = getCurrentEpisode();
 }

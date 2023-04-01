@@ -1,14 +1,13 @@
+
 const isVideoFrame1 = window.frameElement != null;
 const modal = document.querySelector(".generalModal");
-console.log(modal)
+
 if(modal){
   modal.remove();
 }
 if(isVideoFrame1){
- console.log(window.ads)
   setTimeout(()=>{
     let timeoutId;
- console.log(window.ads)
   
     async function loadNextEpisodeElement(videoDiv) {
       let toolbar_url = chrome.runtime.getURL("next-episode.html");
@@ -67,7 +66,9 @@ if(isVideoFrame1){
     }
    
     async function goToNextEpisode(){
-      
+      console.log(window.reCaptchaIDs);
+      console.log(window.vn9u304jmi0vfernjgu9r3nmefomcreojm);
+      console.log(window.fui093jnf0n34u9fnh3rqwe9i0f30i4fm3);
 
       port.postMessage({nextEpisode: true, videoWidth: document.querySelector("video").clientWidth});
     }
@@ -78,11 +79,19 @@ if(isVideoFrame1){
       const videoDiv = document.querySelector("#customVideoPlayer div");
       
       if(video){
+
         port.onMessage.addListener((event) => {
-        if(event.fullScreen){
-          document.body.addEventListener("click",() => video.requestFullscreen())
-          document.body.click()
-        }
+          console.log(event);
+          
+          var url = new URL(event.link);
+          var src = url.searchParams.get("link");
+          video.src = src;
+          video.play();
+
+          if(event.fullScreen){
+            document.body.addEventListener("click",() => video.requestFullscreen())
+            document.body.click()
+          }
         });
 
         let isElementLoaded = false;

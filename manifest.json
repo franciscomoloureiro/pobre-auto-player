@@ -2,6 +2,11 @@
     "manifest_version": 3,
     "name": "PobreTV AutoPlay",
     "description": "Auto play next episode on pobre tv",
+    "permissions": [ "tabs",
+    "storage",
+    "scripting",
+    "activeTab",
+    "cookies"],
     "version": "0.0",
     "background": {
         "service_worker":"event-handler.js"
@@ -10,11 +15,11 @@
       "matches": [
         "https://*.pobre.wtf/*"
       ],
-      "resources": ["next-episode.html"]
+      "resources": ["next-episode.html", "scripts/script.js"]
     }],
     "content_scripts": [
         {
-          "js": ["scripts/episode-list.js", "scripts/frame.js"],
+          "js": ["scripts/episode-list.js", "scripts/frame.js", "libs/crypto-js.min.js"],
           "css": [ "next-episode.css" ],
           "matches": [
             "https://*.pobre.wtf/*"
@@ -23,3 +28,4 @@
         }
       ]
   }
+
